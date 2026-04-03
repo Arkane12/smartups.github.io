@@ -1,1 +1,170 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="manifest" href="manifest.json">
+  <title>Smart UPS Dashboard</title>
 
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0a0a">
+
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="style.css">
+  
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <button class="nav-btn" id="navBtn" onclick="openDrawer()">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+  <div class="settings-drawer" id="settingsDrawer">
+    <div class="drawer-header">
+      <div class="drawer-app-name">Router UPS</div>
+    </div>
+    <div class="drawer-menu">
+      <div class="drawer-menu-item" onclick="goHome()">
+        <span class="material-symbols-outlined drawer-menu-icon">home</span>
+        <div>
+          <div class="drawer-menu-label" id="menuHome">Головна</div>
+          <div class="drawer-menu-sub" id="drawerHomeSub">-- V  |  --</div>
+        </div>
+      </div>
+      <div class="drawer-divider"></div>
+      <div class="drawer-menu-item" onclick="goToPage('pageCalib')">
+        <span class="material-symbols-outlined drawer-menu-icon">tune</span>
+        <span class="drawer-menu-label" id="menuCalib">Калібрування</span>
+      </div>
+      <div class="drawer-divider"></div>
+      <div class="drawer-menu-item" onclick="goToPage('pageLang')">
+        <span class="material-symbols-outlined drawer-menu-icon">language</span>
+        <span class="drawer-menu-label" id="menuLang">Мова</span>
+      </div>
+      <div class="drawer-divider"></div>
+      <div class="drawer-menu-item" onclick="goToPage('pageMac')">
+        <span class="material-symbols-outlined drawer-menu-icon">router</span>
+        <span class="drawer-menu-label" id="menuMac">MAC Адреси</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="pageSetup">
+    <div class="card" style="text-align:center;">
+      <div class="page-title">
+        <span class="material-symbols-outlined">add_link</span>
+        <span id="setupTitleText">Додати пристрій</span>
+      </div>
+      <div style="position: relative;">
+        <input type="text" id="idInput" class="id-input" placeholder="" oninput="onMacInput(this)" onfocus="onMacFocus()" onblur="onMacBlur()" onkeypress="handleKeyPress(event)" autocomplete="off">
+        <div class="mac-tooltip" id="macTooltip"></div>
+      </div>
+      <button class="btn" id="connectBtn" onclick="connectDevice()">Підключити</button>
+      <span class="cancel-link" id="cancelLink" style="display:none;" onclick="cancelSetup()">Скасувати</span>
+    </div>
+  </div>
+
+  <div class="page" id="pageDashboard">
+    <div class="card">
+      <div class="header">
+        <div class="device-selector-wrapper">
+          <select id="deviceSelect" class="device-select" onchange="onDeviceChange(this.value)"></select>
+        </div>
+        <div class="header-dot dot-offline" id="headerDot"></div>
+      </div>
+      <div id="status" class="status-badge offline">Підключення...</div>
+      <div class="data-row">
+        <div class="data-label" id="labelVoltage">Напруга АКБ</div>
+        <span id="volts" class="value">-- V</span>
+      </div>
+      <div class="data-row">
+        <div class="data-label" id="labelCharge">Рівень заряду</div>
+        <span id="perc" class="value">-- %</span>
+      </div>
+      <div class="data-row">
+        <div class="data-label" id="labelRuntime">Орієнтовний час роботи</div>
+        <span id="runtime" class="time-value">--</span>
+      </div>
+      <div class="footer">MAERES</div>
+    </div>
+  </div>
+
+  <div class="page" id="pageCalib">
+    <div class="card">
+      <div class="settings-page-title">
+        <span class="material-symbols-outlined">tune</span>
+        <span id="calibPageTitleText">Калібрування</span>
+      </div>
+      <div class="current-params">
+        <span id="curParamsLabel">Поточні параметри:</span><br>
+        <span class="saved-values"><span id="currentCap">--</span> mAh</span> &nbsp;|&nbsp;
+        <span class="saved-values"><span id="currentVolts">--</span> V</span> &nbsp;|&nbsp;
+        <span class="saved-values"><span id="currentAmps">--</span> A</span>
+      </div>
+      <div class="input-group">
+        <label id="capLabel">Загальна ємність АКБ (mAh)</label>
+        <input type="number" id="capInput" placeholder="Напр. 12000" inputmode="numeric">
+      </div>
+      <div class="input-group">
+        <label id="voltsLabel">Робоча напруга пристроїв (V)</label>
+        <input type="number" id="voltsInput" placeholder="Напр. 12" step="0.1" inputmode="decimal">
+      </div>
+      <div class="input-group">
+        <label id="ampsLabel">Сумарний струм споживання (A)</label>
+        <input type="number" id="ampsInput" placeholder="Напр. 1.2" step="0.1" inputmode="decimal">
+      </div>
+      <button class="btn" id="saveBtn" onclick="saveSettings()">Зберегти для цього ДБЖ</button>
+    </div>
+  </div>
+
+  <div class="page" id="pageLang">
+    <div class="card">
+      <div class="settings-page-title">
+        <span class="material-symbols-outlined">language</span>
+        <span id="langPageTitleText">Мова інтерфейсу</span>
+      </div>
+      <div class="lang-options">
+        <div class="lang-option active" data-lang="uk" onclick="setLang('uk')">
+          <span class="lang-option-name">Українська</span>
+          <span class="material-symbols-outlined lang-check">check</span>
+        </div>
+        <div class="lang-option" data-lang="en" onclick="setLang('en')">
+          <span class="lang-option-name">English</span>
+          <span class="material-symbols-outlined lang-check">check</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="pageMac">
+    <div class="card">
+      <div class="settings-page-title">
+        <span class="material-symbols-outlined">router</span>
+        <span id="macPageTitleText">MAC Адреси пристроїв</span>
+      </div>
+      <div class="mac-list" id="macList"></div>
+      <div class="mac-add-row">
+        <div class="mac-input-wrapper">
+          <input type="text" class="mac-input-field" id="macAddInput"
+            placeholder="Введіть MAC адресу"
+            autocomplete="off"
+            oninput="onMacInput(this)"
+            onfocus="onMacFocus()"
+            onblur="onMacBlur()"
+            onkeypress="if(event.key==='Enter') addMac()">
+            <div class="mac-tooltip" id="macTooltip"></div>
+        </div>
+        <button class="mac-add-btn" id="macAddBtn" onclick="addMac()">Додати</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
